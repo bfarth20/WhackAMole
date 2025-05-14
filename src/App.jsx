@@ -1,3 +1,10 @@
+import { GameProvider } from "./context/GameContext";
+import Game from "./components/Game";
+
 export default function App() {
-  return <></>;
+  return (
+    <GameProvider>
+      <Game />
+    </GameProvider>
+  );
 }
