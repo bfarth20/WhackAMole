@@ -17,7 +17,9 @@ function getRandomHole(prevHole, total = 9) {
 
 export function GameProvider({ children }) {
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
+  const [highScore, setHighScore] = useState(() => {
+    return parseInt(localStorage.getItem("highScore")) || 0;
+  });
   const [currentHole, setCurrentHole] = useState(getRandomHole(-1));
   const [mode, setMode] = useState("welcome");
   const [timeLeft, setTimeLeft] = useState(15);
@@ -25,6 +27,10 @@ export function GameProvider({ children }) {
   //THIS IS A NEW THING
   //usRef is like a little box where you can store a value, but it wont reset at rerenders
   const timerRef = useRef(null);
+  const scoreRef = useRef(score);
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
 
   function whackMole() {
     if (mode !== "playing") return;
@@ -45,6 +51,11 @@ export function GameProvider({ children }) {
     if (timerRef.current) clearInterval(timerRef.current);
   }
 
+  //THIS IS JUST GOING TOO FAR, BUT I WANTED TO SEE HOW TO SAVE THE HIGHSCORE WHEN THE PAGE REFRESHES
+  useEffect(() => {
+    localStorage.setItem("highScore", highScore);
+  }, [highScore]);
+
   //THIS IS A NEW CONCEPT
   //IF MODE IS IN "PLAYING", IT WILL START A TIMER THAT COUNTS DOWN
   //AFTER COMPLETING IT CLEANS UP
@@ -56,7 +67,7 @@ export function GameProvider({ children }) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          setHighScore((prevHigh) => Math.max(prevHigh, score));
+          setHighScore((prevHigh) => Math.max(prevHigh, scoreRef.current));
           setMode("gameover");
           return 0;
         }
